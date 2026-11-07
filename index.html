@@ -63,7 +63,69 @@
   </main>
   <footer class="footer"><div class="wrap footer-inner"><p>XPRO Treinamento</p><p>Dois Irmãos · RS</p></div></footer>
   <script>
-    (()=>{const slides=[...document.querySelectorAll('.slide')],count=document.querySelector('.slide-count'),prev=document.querySelector('.prev'),next=document.querySelector('.next'),hero=document.querySelector('.hero'),menu=document.querySelector('.menu-btn'),links=document.querySelector('.nav-links');let current=0,timer;window.dataLayer=window.dataLayer||[];const track=(event,detail={})=>{const payload={event,site:'xpro-treinamento',...detail};window.dispatchEvent(new CustomEvent('xpro:interaction',{detail:payload}));window.dataLayer.push(payload)};track('page_view',{page_location:location.pathname});document.addEventListener('click',e=>{const el=e.target.closest('a,button,[data-track]');if(el)track('click',{action:el.dataset.track||el.getAttribute('aria-label')||'link',label:el.textContent.trim(),target:el.getAttribute('href')||'',section:el.closest('section')?.id||'header'})});const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){track('section_view',{section:entry.target.id||'inicio'});observer.unobserve(entry.target)}}),{threshold:.35});document.querySelectorAll('main section[id]').forEach(section=>observer.observe(section));const show=n=>{slides[current].classList.remove('active');slides[current].setAttribute('aria-hidden','true');current=(n+slides.length)%slides.length;slides[current].classList.add('active');slides[current].setAttribute('aria-hidden','false');count.textContent=String(current+1).padStart(2,'0')+' / 0'+slides.length;track('carousel_change',{slide:current+1})};const start=()=>{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)timer=setInterval(()=>show(current+1),5000)};const reset=()=>{clearInterval(timer);start()};next.addEventListener('click',()=>{show(current+1);reset()});prev.addEventListener('click',()=>{show(current-1);reset()});hero.addEventListener('mouseenter',()=>clearInterval(timer));hero.addEventListener('mouseleave',start);hero.addEventListener('focusin',()=>clearInterval(timer));hero.addEventListener('focusout',start);start();menu.addEventListener('click',()=>{const open=links.classList.toggle('open');menu.classList.toggle('is-open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Fechar menu':'Abrir menu');track('menu_toggle',{open})});links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{links.classList.remove('open');menu.classList.remove('is-open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Abrir menu')}))})();
+    (()=>{
+      const slides=[...document.querySelectorAll('.slide')];
+      const count=document.querySelector('.slide-count');
+      const prev=document.querySelector('.prev');
+      const next=document.querySelector('.next');
+      const hero=document.querySelector('.hero');
+      const menu=document.querySelector('.menu-btn');
+      const links=document.querySelector('.nav-links');
+      const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+      let current=0,timer=null;
+
+      window.dataLayer=window.dataLayer||[];
+      const track=(event,detail={})=>{
+        const payload={event,site:'xpro-treinamento',...detail};
+        window.dispatchEvent(new CustomEvent('xpro:interaction',{detail:payload}));
+        window.dataLayer.push(payload);
+      };
+      track('page_view',{page_location:location.pathname});
+      document.addEventListener('click',e=>{
+        const el=e.target.closest('a,button,[data-track]');
+        if(el)track('click',{action:el.dataset.track||el.getAttribute('aria-label')||'link',label:el.textContent.trim(),target:el.getAttribute('href')||'',section:el.closest('section')?.id||'header'});
+      });
+      const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(entry.isIntersecting){track('section_view',{section:entry.target.id||'inicio'});observer.unobserve(entry.target)}
+      }),{threshold:.35});
+      document.querySelectorAll('main section[id]').forEach(section=>observer.observe(section));
+
+      const show=n=>{
+        slides[current].classList.remove('active');
+        slides[current].setAttribute('aria-hidden','true');
+        current=(n+slides.length)%slides.length;
+        slides[current].classList.add('active');
+        slides[current].setAttribute('aria-hidden','false');
+        count.textContent=String(current+1).padStart(2,'0')+' / 0'+slides.length;
+        track('carousel_change',{slide:current+1});
+      };
+      const stop=()=>{clearTimeout(timer);timer=null};
+      const start=()=>{
+        stop();
+        if(!reducedMotion.matches)timer=setTimeout(()=>{show(current+1);start()},5000);
+      };
+      next.addEventListener('click',()=>{show(current+1);start()});
+      prev.addEventListener('click',()=>{show(current-1);start()});
+      hero.addEventListener('mouseenter',stop);
+      hero.addEventListener('mouseleave',start);
+      hero.addEventListener('focusin',stop);
+      hero.addEventListener('focusout',e=>{if(!hero.contains(e.relatedTarget))start()});
+      start();
+
+      menu.addEventListener('click',()=>{
+        const open=links.classList.toggle('open');
+        menu.classList.toggle('is-open',open);
+        menu.setAttribute('aria-expanded',String(open));
+        menu.setAttribute('aria-label',open?'Fechar menu':'Abrir menu');
+        track('menu_toggle',{open});
+      });
+      links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+        links.classList.remove('open');
+        menu.classList.remove('is-open');
+        menu.setAttribute('aria-expanded','false');
+        menu.setAttribute('aria-label','Abrir menu');
+      }));
+    })();
   </script>
 </body>
 </html>
